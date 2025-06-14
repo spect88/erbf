@@ -228,7 +228,7 @@ class Erbf::Formatter
     visit_erb_keyword(node, can_have_statements: false) do
       # "children" are the thing between "case condition" and "when value"
       # Valid values are basically whitespace and ERB comments
-      if node.children.any?
+      if node.children.any? { |child| !blank_node?(child) }
         q.breakable("")
         visit_elements(node.children)
       end
@@ -245,7 +245,13 @@ class Erbf::Formatter
     end
   end
 
+  alias visit_erb_case_match_node visit_erb_case_node
+
   def visit_erb_when_node(node)
+    visit_erb_keyword(node, can_have_end: false)
+  end
+
+  def visit_erb_in_node(node)
     visit_erb_keyword(node, can_have_end: false)
   end
 

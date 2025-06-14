@@ -128,7 +128,6 @@ class ErbTest < FormattingTest
   end
 
   def test_case_in
-    skip("Herb doesn't support 'case in' yet")
     assert_formatting_output(<<~INPUT, <<~EXPECTED_OUTPUT)
       <% case hash %>
       <% in { a: Integer } %>
@@ -140,9 +139,9 @@ class ErbTest < FormattingTest
       <% end %>
     INPUT
       <% case hash %>
-      <% in { a: Integer } %>
+      <% in a: Integer %>
         1
-      <% in [Integer, Integer]  %>
+      <% in [Integer, Integer] %>
         2
       <% else %>
         default
