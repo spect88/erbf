@@ -2,16 +2,16 @@ PATH
   remote: .
   specs:
     erbf (0.1.0)
-      herb (~> 0.1)
+      herb (~> 0.2)
       prettier_print (~> 1.2)
 
 GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.3)
-    herb (0.1.1)
-    herb (0.1.1-arm64-darwin)
-    herb (0.1.1-x86_64-darwin)
+    herb (0.2.0)
+    herb (0.2.0-arm64-darwin)
+    herb (0.2.0-x86_64-darwin)
     json (2.11.1)
     language_server-protocol (3.17.0.4)
     lint_roller (1.1.0)
