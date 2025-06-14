@@ -1,0 +1,10 @@
+{
+  "name": "test-dependencies",
+  "version": "0.0.1",
+  "description": "JS dependencies for test purposes",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}

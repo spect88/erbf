@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/erbf"
+require_relative "../lib/erbf/cli"
+
+exit(Erbf::CLI.call(ARGV, $stdin))
