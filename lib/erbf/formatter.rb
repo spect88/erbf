@@ -19,79 +19,20 @@ class Erbf::Formatter
 
   def visit(node)
     debug { "visiting #{node.class}" }
-    case node
-    when Herb::AST::DocumentNode
-      visit_document(node)
-    when Herb::AST::WhitespaceNode
-      visit_whitespace(node)
-    when Herb::AST::LiteralNode
-      visit_literal(node)
-    when Herb::AST::HTMLDoctypeNode
-      visit_html_doctype(node)
-    when Herb::AST::HTMLCommentNode
-      visit_html_comment(node)
-    when Herb::AST::HTMLElementNode
-      visit_html_element(node)
-    when Herb::AST::HTMLOpenTagNode
-      visit_html_open_tag(node)
-    when Herb::AST::HTMLCloseTagNode
-      visit_html_close_tag(node)
-    when Herb::AST::HTMLSelfCloseTagNode
-      visit_html_self_close_tag(node)
-    when Herb::AST::HTMLAttributeNode
-      visit_html_attribute(node)
-    when Herb::AST::HTMLAttributeNameNode
-      visit_html_attribute_name(node)
-    when Herb::AST::HTMLAttributeValueNode
-      visit_html_attribute_value(node)
-    when Herb::AST::HTMLTextNode
-      visit_html_text(node)
-    when Herb::AST::ERBIfNode
-      visit_erb_if(node)
-    when Herb::AST::ERBUnlessNode
-      visit_erb_unless(node)
-    when Herb::AST::ERBElseNode
-      visit_erb_else(node)
-    when Herb::AST::ERBCaseNode
-      visit_erb_case(node)
-    when Herb::AST::ERBWhenNode
-      visit_erb_when(node)
-    when Herb::AST::ERBWhileNode
-      visit_erb_while(node)
-    when Herb::AST::ERBUntilNode
-      visit_erb_until(node)
-    when Herb::AST::ERBBlockNode
-      visit_erb_block(node)
-    when Herb::AST::ERBForNode
-      visit_erb_for(node)
-    when Herb::AST::ERBRescueNode
-      visit_erb_rescue(node)
-    when Herb::AST::ERBBeginNode
-      visit_erb_begin(node)
-    when Herb::AST::ERBEnsureNode
-      visit_erb_ensure(node)
-    when Herb::AST::ERBContentNode
-      visit_erb_content(node)
-    when Herb::AST::ERBEndNode
-      visit_erb_end(node)
-    end
+    node&.accept(self)
   end
 
-  private
-
-  attr_reader :q
-
-  def visit_document(node)
+  def visit_document_node(node)
     visit_elements(node.children)
   end
 
-  def visit_html_doctype(node)
+  def visit_html_doctype_node(node)
     q.text(node.tag_opening.value.downcase)
     node.children.each(&method(:visit))
     q.text(node.tag_closing.value)
   end
 
-  def visit_html_element(node)
+  def visit_html_element_node(node)
     if node.is_void
       debug { "<#{node.open_tag.tag_name.value}> void" }
       q.group do
@@ -166,7 +107,7 @@ class Erbf::Formatter
     end
   end
 
-  def visit_html_open_tag(node)
+  def visit_html_open_tag_node(node)
     q.group do
       q.text("<")
       q.text(node.tag_name.value.downcase)
@@ -180,23 +121,23 @@ class Erbf::Formatter
     # The > is handled in #visit_html_element
   end
 
-  def visit_html_close_tag(node)
+  def visit_html_close_tag_node(node)
     q.text("</")
     q.text(node.tag_name.value.downcase)
     # The > is handled in #visit_html_element
   end
 
-  def visit_html_attribute(node)
+  def visit_html_attribute_node(node)
     visit(node.name)
     q.text("=") if node.value
     visit(node.value)
   end
 
-  def visit_html_attribute_name(node)
+  def visit_html_attribute_name_node(node)
     q.text(case_insensitive_attribute_name?(node) ? node.name.value.downcase : node.name.value)
   end
 
-  def visit_html_attribute_value(node)
+  def visit_html_attribute_value_node(node)
     if node.children.size == 1 && node.children.first.is_a?(Herb::AST::LiteralNode)
       # The value is a literal, so we can process it to find the optimal way to quote it
       value = node.children.first.content
@@ -218,11 +159,11 @@ class Erbf::Formatter
     end
   end
 
-  def visit_literal(node)
+  def visit_literal_node(node)
     q.text(node.content)
   end
 
-  def visit_html_text(node)
+  def visit_html_text_node(node)
     if context?(:preserve_whitespace)
       q.group { q.text(node.content) }
       return
@@ -238,13 +179,13 @@ class Erbf::Formatter
     end
   end
 
-  def visit_html_comment(node)
+  def visit_html_comment_node(node)
     q.text("<!--")
     node.children.each(&method(:visit))
     q.text("-->")
   end
 
-  def visit_erb_content(node)
+  def visit_erb_content_node(node)
     q.text(node.tag_opening.value)
 
     # Don't format comments
@@ -265,7 +206,7 @@ class Erbf::Formatter
     q.text(node.tag_closing.value)
   end
 
-  def visit_erb_if(node)
+  def visit_erb_if_node(node)
     visit_erb_keyword(node) do
       if node.subsequent
         q.breakable("")
@@ -274,7 +215,7 @@ class Erbf::Formatter
     end
   end
 
-  def visit_erb_unless(node)
+  def visit_erb_unless_node(node)
     visit_erb_keyword(node) do
       if node.else_clause
         q.breakable("")
@@ -283,7 +224,7 @@ class Erbf::Formatter
     end
   end
 
-  def visit_erb_case(node)
+  def visit_erb_case_node(node)
     visit_erb_keyword(node, can_have_statements: false) do
       # "children" are the thing between "case condition" and "when value"
       # Valid values are basically whitespace and ERB comments
@@ -304,11 +245,11 @@ class Erbf::Formatter
     end
   end
 
-  def visit_erb_when(node)
+  def visit_erb_when_node(node)
     visit_erb_keyword(node, can_have_end: false)
   end
 
-  def visit_erb_else(node)
+  def visit_erb_else_node(node)
     q.group do
       q.text(node.tag_opening.value)
       q.breakable(" ")
@@ -325,19 +266,19 @@ class Erbf::Formatter
     end
   end
 
-  def visit_erb_while(node)
+  def visit_erb_while_node(node)
     visit_erb_keyword(node)
   end
 
-  def visit_erb_until(node)
+  def visit_erb_until_node(node)
     visit_erb_keyword(node)
   end
 
-  def visit_erb_for(node)
+  def visit_erb_for_node(node)
     visit_erb_keyword(node)
   end
 
-  def visit_erb_begin(node)
+  def visit_erb_begin_node(node)
     visit_erb_keyword(node) do
       if node.rescue_clause
         q.breakable("")
@@ -356,7 +297,7 @@ class Erbf::Formatter
     end
   end
 
-  def visit_erb_rescue(node)
+  def visit_erb_rescue_node(node)
     visit_erb_keyword(node, can_have_end: false) do
       if node.subsequent
         q.breakable("")
@@ -365,11 +306,11 @@ class Erbf::Formatter
     end
   end
 
-  def visit_erb_ensure(node)
+  def visit_erb_ensure_node(node)
     visit_erb_keyword(node, can_have_end: false)
   end
 
-  def visit_erb_block(node)
+  def visit_erb_block_node(node)
     visit_erb_keyword(node, can_have_statements: false) do
       if node.body.any?
         q.indent do
@@ -380,7 +321,7 @@ class Erbf::Formatter
     end
   end
 
-  def visit_erb_end(node)
+  def visit_erb_end_node(node)
     q.group do
       q.text(node.tag_opening.value)
       q.breakable(" ")
@@ -389,6 +330,10 @@ class Erbf::Formatter
       q.text(node.tag_closing.value)
     end
   end
+
+  private
+
+  attr_reader :q
 
   def visit_erb_keyword(node, can_have_statements: true, can_have_end: true, &block)
     q.group do
